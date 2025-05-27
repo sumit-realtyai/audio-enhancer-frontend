@@ -50,10 +50,6 @@ function PreviewPage() {
       </div>
 
       <div className="preview-content">
-        <div className="video-section">
-          <VideoPlayer src={processedVideoUrl} />
-        </div>
-        
         <div className="editor-section">
           {activeTab === 'script' && (
             <TranscriptViewer sheetLink={sheetLink} />
@@ -67,6 +63,10 @@ function PreviewPage() {
           {activeTab === 'aiAvatar' && (
             <div className="coming-soon">AI Avatar features coming soon</div>
           )}
+        </div>
+        
+        <div className="video-section">
+          <VideoPlayer src={processedVideoUrl} />
         </div>
       </div>
     </div>
