@@ -72,5 +72,3 @@ function PreviewPage() {
     </div>
   )
 }
-
-export default PreviewPage
