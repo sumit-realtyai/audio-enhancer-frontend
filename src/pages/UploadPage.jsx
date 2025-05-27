@@ -12,7 +12,7 @@ function UploadPage() {
   
   const handleProcessVideo = async () => {
     await processVideo()
-    navigate('/results')
+    navigate('/preview')
   }
   
   return (
@@ -41,34 +41,11 @@ function UploadPage() {
             onClick={handleProcessVideo}
             whileHover={videoFile && !processing ? { scale: 1.02 } : {}}
             whileTap={videoFile && !processing ? { scale: 0.98 } : {}}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
           >
             <FiUpload />
             <span>Process Video</span>
           </motion.button>
         )}
-      </div>
-      
-      <div className="features-grid">
-        <div className="feature">
-          <div className="feature-icon">🔤</div>
-          <h3>Automatic Transcription</h3>
-          <p>Get accurate text transcripts of your video's audio content</p>
-        </div>
-        
-        <div className="feature">
-          <div className="feature-icon">🎙️</div>
-          <h3>Voice Replacement</h3>
-          <p>Change the original voice to a different voice style</p>
-        </div>
-        
-        <div className="feature">
-          <div className="feature-icon">⚡</div>
-          <h3>Fast Processing</h3>
-          <p>Our advanced AI processes your videos quickly</p>
-        </div>
       </div>
     </div>
   )
