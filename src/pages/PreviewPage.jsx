@@ -8,6 +8,7 @@ import './PreviewPage.css'
 
 function PreviewPage() {
   const [activeTab, setActiveTab] = useState('script')
+  const [selectedVoice, setSelectedVoice] = useState('anshul')
   const { 
     processedVideoUrl,
     voiceoverProcessing,
@@ -55,7 +56,16 @@ function PreviewPage() {
             <TranscriptViewer sheetLink={sheetLink} />
           )}
           {activeTab === 'aiVoice' && (
-            <div className="coming-soon">AI Voice features coming soon</div>
+            <div className="voice-selector">
+              <select 
+                className="voice-dropdown"
+                value={selectedVoice}
+                onChange={(e) => setSelectedVoice(e.target.value)}
+              >
+                <option value="anshul">Anshul</option>
+                <option value="ai">AI Voice</option>
+              </select>
+            </div>
           )}
           {activeTab === 'zoom' && (
             <div className="coming-soon">Zoom features coming soon</div>
