@@ -5,6 +5,7 @@
   flex-direction: column;
   background-color: var(--color-bg-primary);
   overflow: hidden;
+  
 }
 
 .preview-header {
