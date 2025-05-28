@@ -74,12 +74,14 @@
   overflow-y: auto;
   border-right: 1px solid var(--color-border);
   background-color: white;
+  padding: 2rem;
 }
 
 .video-section {
   width: 50%;
   background-color: #f8f9fa;
   padding: 2rem;
+  overflow-y: auto;
 }
 
 .voice-selector {

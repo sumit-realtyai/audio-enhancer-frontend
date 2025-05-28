@@ -15,8 +15,14 @@ function VideoPlayer({ src, title }) {
 
   useEffect(() => {
     const video = videoRef.current
-    
     if (!video || !src) return
+
+    // Reset video state when src changes
+    setIsPlaying(false)
+    setProgress(0)
+    setCurrentTime(0)
+    setIsLoading(true)
+    video.load() // Force reload when src changes
     
     const handleLoadedData = () => {
       setDuration(video.duration)
@@ -125,6 +131,7 @@ function VideoPlayer({ src, title }) {
           className="video-element"
           onClick={togglePlay}
           playsInline
+          key={src} // Force remount when src changes
         />
         
         <motion.div 

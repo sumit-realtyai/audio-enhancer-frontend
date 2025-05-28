@@ -22,6 +22,7 @@
   object-fit: contain;
   display: block;
   cursor: pointer;
+  background: #000;
 }
 
 .video-controls {
