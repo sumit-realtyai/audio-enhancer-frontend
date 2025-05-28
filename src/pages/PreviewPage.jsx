@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { FiRefreshCw } from 'react-icons/fi'
 import VideoPlayer from '../components/VideoPlayer'
 import TranscriptViewer from '../components/TranscriptViewer'
@@ -45,8 +45,8 @@ function PreviewPage() {
           whileTap={{ scale: 0.98 }}
           disabled={voiceoverProcessing}
         >
-          <FiRefreshCw />
-          <span>Refresh Voiceover</span>
+          <FiRefreshCw className={voiceoverProcessing ? 'spinning' : ''} />
+          <span>{voiceoverProcessing ? 'Processing...' : 'Refresh Voiceover'}</span>
         </motion.button>
       </div>
 
@@ -76,7 +76,28 @@ function PreviewPage() {
         </div>
         
         <div className="video-section">
-          <VideoPlayer src={processedVideoUrl} />
+          <AnimatePresence mode="wait">
+            {voiceoverProcessing ? (
+              <motion.div 
+                className="video-processing-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="processing-spinner" />
+                <p>Generating new video with selected voice...</p>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                key="video-player"
+              >
+                <VideoPlayer src={processedVideoUrl} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

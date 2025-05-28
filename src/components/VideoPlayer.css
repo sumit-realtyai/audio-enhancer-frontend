@@ -32,7 +32,7 @@
   right: 0;
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
   padding: var(--space-1) var(--space-2);
-  opacity: 0.8;
+  opacity: 0;
   transition: opacity var(--transition-normal) ease;
 }
 
@@ -150,8 +150,9 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.9);
   color: white;
+  z-index: 10;
 }
 
 .spinner {

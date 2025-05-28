@@ -27,6 +27,11 @@ function VideoPlayer({ src, title }) {
     const handleLoadedData = () => {
       setDuration(video.duration)
       setIsLoading(false)
+      // Attempt to play video after it's loaded
+      video.play().catch(() => {
+        // Autoplay was prevented
+        setIsPlaying(false)
+      })
     }
     
     const handleTimeUpdate = () => {
@@ -39,15 +44,22 @@ function VideoPlayer({ src, title }) {
       setProgress(0)
       setCurrentTime(0)
     }
+
+    const handleError = () => {
+      setIsLoading(false)
+      console.error('Error loading video')
+    }
     
     video.addEventListener('loadeddata', handleLoadedData)
     video.addEventListener('timeupdate', handleTimeUpdate)
     video.addEventListener('ended', handleEnded)
+    video.addEventListener('error', handleError)
     
     return () => {
       video.removeEventListener('loadeddata', handleLoadedData)
       video.removeEventListener('timeupdate', handleTimeUpdate)
       video.removeEventListener('ended', handleEnded)
+      video.removeEventListener('error', handleError)
     }
   }, [src])
 
