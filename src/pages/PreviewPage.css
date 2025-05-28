@@ -1,25 +1,24 @@
 .preview-page {
-  width: 100%;
+  width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: var(--color-bg-primary);
   overflow: hidden;
-  
 }
 
 .preview-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid var(--color-border);
+  padding: 1rem 2rem;
   background-color: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .tabs-container {
   display: flex;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .tab {
@@ -39,7 +38,7 @@
 .tab.active::after {
   content: '';
   position: absolute;
-  bottom: -0.5rem;
+  bottom: -1px;
   left: 0;
   width: 100%;
   height: 2px;
@@ -74,15 +73,17 @@
   width: 50%;
   overflow-y: auto;
   border-right: 1px solid var(--color-border);
+  background-color: white;
 }
 
 .video-section {
   width: 50%;
   background-color: #f8f9fa;
+  padding: 2rem;
 }
 
 .voice-selector {
-  padding: 1rem;
+  padding: 2rem;
   border-bottom: 1px solid var(--color-border);
 }
 
