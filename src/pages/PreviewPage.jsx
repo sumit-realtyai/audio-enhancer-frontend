@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { FiRefreshCw } from 'react-icons/fi'
 import VideoPlayer from '../components/VideoPlayer'
 import TranscriptViewer from '../components/TranscriptViewer'
+import { useVideo } from '../context/VideoContext'
 import './PreviewPage.css'
 
 function PreviewPage() {
@@ -37,14 +38,16 @@ function PreviewPage() {
           ))}
         </div>
         
-        <button
+        <motion.button
           className="refresh-button"
           onClick={refreshVoiceover}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           disabled={voiceoverProcessing}
         >
           <FiRefreshCw />
           <span>Refresh Voiceover</span>
-        </button>
+        </motion.button>
       </div>
 
       <div className="preview-content">
@@ -55,9 +58,9 @@ function PreviewPage() {
           {activeTab === 'aiVoice' && (
             <div className="voice-selector">
               <select 
+                className="voice-dropdown"
                 value={selectedVoice}
                 onChange={(e) => setSelectedVoice(e.target.value)}
-                className="voice-dropdown"
               >
                 <option value="anshul">Anshul</option>
                 <option value="ai">AI Voice</option>

@@ -1,8 +1,9 @@
 .preview-page {
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--color-bg-primary);
   overflow: hidden;
 }
 
@@ -10,51 +11,49 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #fff;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-primary);
 }
 
 .tabs-container {
   display: flex;
-  gap: 32px;
+  gap: 1.5rem;
 }
 
 .tab {
-  color: #6b7280;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 8px 0;
-  background: none;
+  padding: 0.5rem 0;
   border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  font-weight: 500;
   cursor: pointer;
   position: relative;
 }
 
 .tab.active {
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .tab.active::after {
   content: '';
   position: absolute;
-  bottom: -13px;
+  bottom: -0.5rem;
   left: 0;
   width: 100%;
   height: 2px;
-  background: #2563eb;
+  background-color: var(--color-primary);
 }
 
 .refresh-button {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: #2563eb;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #0066ff;
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -72,37 +71,32 @@
 
 .editor-section {
   width: 50%;
-  height: 100%;
   overflow-y: auto;
-  background: #f9fafb;
+  border-right: 1px solid var(--color-border);
 }
 
 .video-section {
   width: 50%;
-  height: 100%;
-  background: #f9fafb;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background-color: #f8f9fa;
 }
 
 .voice-selector {
-  padding: 16px;
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .voice-dropdown {
-  width: 100%;
-  max-width: 200px;
-  padding: 8px 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background: white;
-  font-size: 14px;
-  color: #374151;
+  width: 200px;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: white;
 }
 
 .coming-soon {
-  padding: 16px;
-  color: #6b7280;
-  font-size: 14px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
 }
