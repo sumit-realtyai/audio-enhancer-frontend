@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiRefreshCw } from 'react-icons/fi'
+import { FaDownload } from 'react-icons/fa'
 import VideoPlayer from '../components/VideoPlayer'
 import TranscriptViewer from '../components/TranscriptViewer'
+import ProcessingIndicator from '../components/ProcessingIndicator'
 import { useVideo } from '../context/VideoContext'
 import './PreviewPage.css'
 
@@ -38,16 +40,32 @@ function PreviewPage() {
           ))}
         </div>
         
-        <motion.button
-          className="refresh-button"
-          onClick={refreshVoiceover}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          disabled={voiceoverProcessing}
-        >
-          <FiRefreshCw className={voiceoverProcessing ? 'spinning' : ''} />
-          <span>{voiceoverProcessing ? 'Processing...' : 'Refresh Voiceover'}</span>
-        </motion.button>
+        <div className="header-actions">
+          <motion.button
+            className="refresh-button"
+            onClick={refreshVoiceover}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={voiceoverProcessing}
+          >
+            <FiRefreshCw className={voiceoverProcessing ? 'spinning' : ''} />
+            <span>{voiceoverProcessing ? 'Processing...' : 'Refresh Voiceover'}</span>
+          </motion.button>
+
+          {processedVideoUrl && (
+            <motion.a
+              href={processedVideoUrl}
+              download="processed-video.mp4"
+              className="download-button"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <FaDownload />
+              <span>Download Video</span>
+            </motion.a>
+          )}
+        </div>
       </div>
 
       <div className="preview-content">
@@ -57,14 +75,18 @@ function PreviewPage() {
           )}
           {activeTab === 'aiVoice' && (
             <div className="voice-selector">
-              <select 
-                className="voice-dropdown"
-                value={selectedVoice}
-                onChange={(e) => setSelectedVoice(e.target.value)}
-              >
-                <option value="anshul">Anshul</option>
-                <option value="ai">AI Voice</option>
-              </select>
+              <div className="voice-selector-header">
+                <label htmlFor="voice-select">Select Voice</label>
+                <select 
+                  id="voice-select"
+                  className="voice-dropdown"
+                  value={selectedVoice}
+                  onChange={(e) => setSelectedVoice(e.target.value)}
+                >
+                  <option value="anshul">Anshul</option>
+                  <option value="ai">AI Voice</option>
+                </select>
+              </div>
             </div>
           )}
           {activeTab === 'zoom' && (
