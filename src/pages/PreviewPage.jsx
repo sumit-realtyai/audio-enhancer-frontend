@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FiRefreshCw } from 'react-icons/fi'
+import { useVideo } from '../context/VideoContext'
 import VideoPlayer from '../components/VideoPlayer'
 import TranscriptViewer from '../components/TranscriptViewer'
 import './PreviewPage.css'
