@@ -2,6 +2,8 @@ import { createContext, useState, useContext } from 'react'
 import axios from 'axios'
 const VideoContext = createContext()
 
+export const useVideo = () => useContext(VideoContext)
+
 export function VideoProvider({ children }) {
   const [videoFile, setVideoFile] = useState(null)
   const [videoUrl, setVideoUrl] = useState(null)
