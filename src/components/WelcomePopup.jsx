@@ -1,10 +1,21 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { FiX, FiMonitor, FiZoomIn, FiMessageCircle, FiDownload } from 'react-icons/fi'
 import './WelcomePopup.css'
 
 function WelcomePopup() {
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => {
+    // Only show popup on first visit to upload page
+    const hasSeenPopup = localStorage.getItem('hasSeenWelcomePopup')
+    if (!hasSeenPopup && location.pathname === '/') {
+      setIsOpen(true)
+      localStorage.setItem('hasSeenWelcomePopup', 'true')
+    }
+  }, [location])
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'unset'
@@ -91,5 +102,3 @@ function WelcomePopup() {
     </AnimatePresence>
   )
 }
-
-export default WelcomePopup
