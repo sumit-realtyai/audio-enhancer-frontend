@@ -31,9 +31,13 @@ function ProcessingIndicator({ text = 'Processing...' }) {
         />
       </motion.div>
       
-      <p className="processing-text">{text}</p>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        <p className="processing-text">{text}</p>
+      </motion.div>
     </div>
   )
 }
-
-export default ProcessingIndicator

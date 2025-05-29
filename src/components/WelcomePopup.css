@@ -1,0 +1,64 @@
+.welcome-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.welcome-popup {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  max-width: 500px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+}
+
+.welcome-header {
+  text-align: center;
+  margin-bottom: var(--space-3);
+}
+
+.welcome-title {
+  font-size: var(--text-2xl);
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+
+.welcome-subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--text-lg);
+}
+
+.features-list {
+  margin: var(--space-3) 0;
+  padding-left: var(--space-3);
+}
+
+.features-list li {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
+}
+
+.download-button {
+  display: block;
+  width: 100%;
+  padding: var(--space-2);
+  background-color: var(--color-primary);
+  color: white;
+  text-align: center;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background-color var(--transition-normal) ease;
+}
+
+.download-button:hover {
+  background-color: var(--color-primary-dark);
+  color: white;
+}

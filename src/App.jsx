@@ -3,11 +3,13 @@ import UploadPage from './pages/UploadPage'
 import PreviewPage from './pages/PreviewPage'
 import NotFoundPage from './pages/NotFoundPage'
 import Layout from './components/Layout'
+import WelcomePopup from './components/WelcomePopup'
 import './App.css'
 
 function App() {
   return (
     <Layout>
+      <WelcomePopup />
       <Routes>
         <Route path="/" element={<UploadPage />} />
         <Route path="/preview" element={<PreviewPage />} />
