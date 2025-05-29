@@ -41,5 +41,3 @@ function ProcessingIndicator({ text = 'Processing...' }) {
     </div>
   )
 }
-
-export default ProcessingIndicator
