@@ -126,7 +126,7 @@
   font-weight: 500;
 }
 
-.download-button {
+.welcome-popup .download-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -144,7 +144,7 @@
   cursor: pointer;
 }
 
-.download-button:hover {
+.welcome-popup .download-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
   color: white;

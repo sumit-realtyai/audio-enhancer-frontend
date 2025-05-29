@@ -74,7 +74,7 @@
   animation: spin 1s linear infinite;
 }
 
-.download-button {
+.preview-page .download-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -89,7 +89,7 @@
   transition: all 0.2s ease;
 }
 
-.download-button:hover {
+.preview-page .download-button:hover {
   filter: brightness(1.1);
   color: white;
 }
