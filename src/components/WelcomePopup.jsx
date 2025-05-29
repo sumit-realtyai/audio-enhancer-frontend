@@ -102,3 +102,5 @@ function WelcomePopup() {
     </AnimatePresence>
   )
 }
+
+export default WelcomePopup
