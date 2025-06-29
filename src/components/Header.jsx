@@ -24,7 +24,8 @@ function Header() {
           transition={{ duration: 0.3, delay: 0.1 }}
         >
           <Link to="/" className="nav-link">Upload</Link>
-          <Link to="/results" className="nav-link">Results</Link>
+          <Link to="/preview" className="nav-link">Preview</Link>
+          <Link to="/videoeditor" className="nav-link">Video Editor</Link>
         </motion.nav>
       </div>
     </header>
