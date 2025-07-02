@@ -41,7 +41,7 @@ function LandingPage() {
     },
     hover: {
       scale: 1.02,
-      y: -5,
+      y: -3,
       transition: {
         duration: 0.3,
         ease: [0.4, 0, 0.2, 1]
@@ -82,27 +82,8 @@ function LandingPage() {
               className="hero-description"
               variants={itemVariants}
             >
-              This platform allows you to record, edit, and enhance videos using AI-powered features — all in one place. 
-              Create professional-quality content with our intuitive tools and cutting-edge technology.
+              This platform allows you to record, edit, and enhance videos using AI-powered features — all in one place.
             </motion.p>
-
-            <motion.div 
-              className="hero-stats"
-              variants={itemVariants}
-            >
-              <div className="stat-item">
-                <FiVideo className="stat-icon" />
-                <span>Screen Recording</span>
-              </div>
-              <div className="stat-item">
-                <FiEdit3 className="stat-icon" />
-                <span>Video Editing</span>
-              </div>
-              <div className="stat-item">
-                <FiZap className="stat-icon" />
-                <span>AI Enhancement</span>
-              </div>
-            </motion.div>
           </div>
         </motion.section>
 
@@ -120,31 +101,19 @@ function LandingPage() {
                 <div className="card-icon recording-icon">
                   <FiMonitor />
                 </div>
+                <div className="card-info">
+                  <h3 className="card-title">Screen Recording & Editing</h3>
+                  <p className="card-description">
+                    Record your screen and edit videos with powerful built-in tools.
+                  </p>
+                </div>
                 <div className="card-badge">Editor</div>
               </div>
               
-              <div className="card-content">
-                <h3 className="card-title">Screen Recording & Editing</h3>
-                <p className="card-description">
-                  Record your screen and edit videos with powerful built-in tools. 
-                  Add zoom effects, transitions, and professional touches to create 
-                  engaging content effortlessly.
-                </p>
-                
-                <div className="card-features">
-                  <div className="feature-item">
-                    <FiPlay className="feature-icon" />
-                    <span>Screen Recording</span>
-                  </div>
-                  <div className="feature-item">
-                    <FiEdit3 className="feature-icon" />
-                    <span>Timeline Editing</span>
-                  </div>
-                  <div className="feature-item">
-                    <FiZap className="feature-icon" />
-                    <span>Auto Zoom Effects</span>
-                  </div>
-                </div>
+              <div className="card-features">
+                <span className="feature-tag">Screen Recording</span>
+                <span className="feature-tag">Timeline Editing</span>
+                <span className="feature-tag">Auto Zoom Effects</span>
               </div>
               
               <motion.button 
@@ -168,31 +137,19 @@ function LandingPage() {
                 <div className="card-icon enhancer-icon">
                   <FiZap />
                 </div>
+                <div className="card-info">
+                  <h3 className="card-title">Video Enhancer</h3>
+                  <p className="card-description">
+                    Enhance your videos using cutting-edge AI technology for clarity and style.
+                  </p>
+                </div>
                 <div className="card-badge">AI Powered</div>
               </div>
               
-              <div className="card-content">
-                <h3 className="card-title">Video Enhancer</h3>
-                <p className="card-description">
-                  Enhance your videos using cutting-edge AI technology for clarity and style. 
-                  Transform ordinary footage into professional-quality content with intelligent 
-                  voice replacement and audio enhancement.
-                </p>
-                
-                <div className="card-features">
-                  <div className="feature-item">
-                    <FiZap className="feature-icon" />
-                    <span>AI Voice Replacement</span>
-                  </div>
-                  <div className="feature-item">
-                    <FiEdit3 className="feature-icon" />
-                    <span>Audio Enhancement</span>
-                  </div>
-                  <div className="feature-item">
-                    <FiVideo className="feature-icon" />
-                    <span>Quality Upscaling</span>
-                  </div>
-                </div>
+              <div className="card-features">
+                <span className="feature-tag">AI Voice Replacement</span>
+                <span className="feature-tag">Audio Enhancement</span>
+                <span className="feature-tag">Quality Upscaling</span>
               </div>
               
               <motion.button 
@@ -207,26 +164,20 @@ function LandingPage() {
           </div>
         </motion.section>
 
-        {/* Additional Info Section */}
-        <motion.section className="info-section" variants={itemVariants}>
-          <div className="info-content">
-            <h2 className="info-title">Why Choose Our Platform?</h2>
-            <div className="info-grid">
-              <div className="info-item">
-                <FiZap className="info-icon" />
-                <h4>AI-Powered</h4>
-                <p>Leverage cutting-edge AI technology for automatic enhancements and intelligent editing.</p>
-              </div>
-              <div className="info-item">
-                <FiEdit3 className="info-icon" />
-                <h4>Professional Tools</h4>
-                <p>Access professional-grade editing features with an intuitive, user-friendly interface.</p>
-              </div>
-              <div className="info-item">
-                <FiVideo className="info-icon" />
-                <h4>All-in-One</h4>
-                <p>Record, edit, and enhance all in one platform. No need for multiple applications.</p>
-              </div>
+        {/* Quick Benefits */}
+        <motion.section className="benefits-section" variants={itemVariants}>
+          <div className="benefits-grid">
+            <div className="benefit-item">
+              <FiZap className="benefit-icon" />
+              <span>AI-Powered Technology</span>
+            </div>
+            <div className="benefit-item">
+              <FiEdit3 className="benefit-icon" />
+              <span>Professional Tools</span>
+            </div>
+            <div className="benefit-item">
+              <FiVideo className="benefit-icon" />
+              <span>All-in-One Platform</span>
             </div>
           </div>
         </motion.section>
