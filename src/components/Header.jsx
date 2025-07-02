@@ -1,8 +1,16 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import './Header.css'
 
 function Header() {
+  const location = useLocation()
+  const isLandingPage = location.pathname === '/'
+
+  // Don't show header on landing page
+  if (isLandingPage) {
+    return null
+  }
+
   return (
     <header className="header">
       <div className="header-content">
@@ -23,8 +31,8 @@ function Header() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <Link to="/" className="nav-link">Upload</Link>
-          <Link to="/preview" className="nav-link">Preview</Link>
+          <Link to="/" className="nav-link">Home</Link>
+          <Link to="/video-enhancer" className="nav-link">Video Enhancer</Link>
           <Link to="/videoeditor" className="nav-link">Video Editor</Link>
         </motion.nav>
       </div>

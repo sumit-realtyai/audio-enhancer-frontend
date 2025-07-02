@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import LandingPage from './pages/LandingPage'
 import UploadPage from './pages/UploadPage'
 import PreviewPage from './pages/PreviewPage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -12,7 +13,8 @@ function App() {
     <Layout>
       <WelcomePopup />
       <Routes>
-        <Route path="/" element={<UploadPage />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/video-enhancer" element={<UploadPage />} />
         <Route path="/preview" element={<PreviewPage />} />
         <Route path="/videoeditor" element={<VideoEditorPage />} />
         <Route path="*" element={<NotFoundPage />} />
