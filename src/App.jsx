@@ -11,7 +11,7 @@ import './App.css'
 function App() {
   return (
     <Layout>
-      <WelcomePopup />
+      {/* <WelcomePopup /> */}
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/video-enhancer" element={<UploadPage />} />
