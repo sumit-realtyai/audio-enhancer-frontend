@@ -1,14 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { VideoPlayer, VideoPlayerRef } from './VideoPlayer';
 import { Timeline } from './Timeline';
 import { ZoomControls } from './ZoomControls';
 import { Header } from './Header';
 import { FileImport } from './FileImport';
 import { ExportModal } from './ExportModal';
-import { SakDataImport } from './SakDataImport';
-import { AutoZoomRecorder } from './AutoZoomRecorder';
 import { TextOverlayComponent } from './TextOverlay';
-import { ZoomEffect, TextOverlay } from '../types';
+import { ZoomEffect, TextOverlay, getInterpolatedZoom, ClicksData } from '../types';
+
 
 export const VideoEditor: React.FC = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -19,28 +18,51 @@ export const VideoEditor: React.FC = () => {
   const [zoomEffects, setZoomEffects] = useState<ZoomEffect[]>([]);
   const [selectedZoom, setSelectedZoom] = useState<ZoomEffect | null>(null);
   const [textOverlays, setTextOverlays] = useState<TextOverlay[]>([]);
+  const [previewTextOverlay, setPreviewTextOverlay] = useState<TextOverlay | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [showSakImport, setShowSakImport] = useState(false);
-  const [showAutoZoomRecorder, setShowAutoZoomRecorder] = useState(false);
+  
+
   const [zoomEnabled, setZoomEnabled] = useState(true);
+  const [ffmpegStatus, setFfmpegStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
   const videoRef = useRef<VideoPlayerRef>(null);
+
+  // Define deleteZoomEffect before using it
+  const deleteZoomEffect = useCallback((id: string) => {
+    setZoomEffects((prev: ZoomEffect[]) => prev.filter(zoom => zoom.id !== id));
+    if (selectedZoom?.id === id) {
+      setSelectedZoom(null);
+    }
+  }, [selectedZoom]);
 
   useEffect(() => {
     if (videoFile) {
-      console.log('Loading video file:', {
-        name: videoFile.name,
-        type: videoFile.type,
-        size: videoFile.size,
-        lastModified: videoFile.lastModified
-      });
       const url = URL.createObjectURL(videoFile);
-      console.log('Created video URL:', url);
       setVideoUrl(url);
       return () => URL.revokeObjectURL(url);
     }
   }, [videoFile]);
 
-  // Add keyboard shortcuts for zoom management
+  const checkFfmpegFiles = useCallback(async () => {
+    setFfmpegStatus('loading');
+    try {
+      const coreJsUrl = new URL('/ffmpeg-core.js', window.location.origin);
+      const coreWasmUrl = new URL('/ffmpeg-core.wasm', window.location.origin);
+      const [jsRes, wasmRes] = await Promise.all([fetch(coreJsUrl), fetch(coreWasmUrl)]);
+      if (jsRes.ok && wasmRes.ok) {
+        setFfmpegStatus('loaded');
+      } else {
+        throw new Error('FFmpeg core files not found on server.');
+      }
+    } catch (e) {
+      console.error("FFmpeg check failed:", e);
+      setFfmpegStatus('error');
+    }
+  }, []);
+
+  useEffect(() => {
+    checkFfmpegFiles();
+  }, [checkFfmpegFiles]);
+
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === 'Delete' && selectedZoom) {
@@ -53,17 +75,18 @@ export const VideoEditor: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [selectedZoom]);
+  }, [selectedZoom, deleteZoomEffect]);
 
-  const addZoomEffect = (startTime: number, endTime: number, x: number, y: number, scale: number) => {
+  const addZoomEffect = (startTime: number, endTime: number, x: number, y: number, scale: number, type: 'manual' | 'autozoom' = 'manual') => {
     const newZoom: ZoomEffect = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       startTime,
       endTime,
       x,
       y,
       scale,
-      transition: 'smooth'
+      transition: 'smooth',
+      type
     };
     setZoomEffects(prev => [...prev, newZoom]);
     setSelectedZoom(newZoom);
@@ -76,21 +99,10 @@ export const VideoEditor: React.FC = () => {
     setSelectedZoom(updatedZoom);
   };
 
-  const deleteZoomEffect = (id: string) => {
-    setZoomEffects(prev => prev.filter(zoom => zoom.id !== id));
-    if (selectedZoom?.id === id) {
-      setSelectedZoom(null);
-    }
-  };
-
-  const deleteAllZoomEffects = () => {
-    setZoomEffects([]);
-    setSelectedZoom(null);
-  };
-
   // Text overlay functions
   const addTextOverlay = (textOverlay: TextOverlay) => {
     setTextOverlays(prev => [...prev, textOverlay]);
+    setPreviewTextOverlay(null); // Clear preview when text is added
   };
 
   const updateTextOverlay = (id: string, updates: Partial<TextOverlay>) => {
@@ -103,13 +115,11 @@ export const VideoEditor: React.FC = () => {
     setTextOverlays(prev => prev.filter(text => text.id !== id));
   };
 
-  const getCurrentZoom = () => {
-    const activeZoom = zoomEffects.find(
-      zoom => currentTime >= zoom.startTime && currentTime <= zoom.endTime
-    );
-    console.log('Current time:', currentTime, 'Active zoom:', activeZoom);
-    return activeZoom || null;
+  const setPreviewText = (preview: TextOverlay | null) => {
+    setPreviewTextOverlay(preview);
   };
+
+
 
   const handleTimeUpdate = (time: number) => {
     setCurrentTime(time);
@@ -130,99 +140,39 @@ export const VideoEditor: React.FC = () => {
     videoRef.current?.pause();
   };
 
-  const handleExportComplete = (exportedBlob: Blob, format: string) => {
-    const newFile = new File([exportedBlob], `exported_video.${format}`, { type: `video/${format}` });
-    setVideoFile(newFile);
-    setShowExportModal(false);
-    console.log('Exported video re-imported successfully.');
-  };
 
-  const handleSakDataImport = (sakData: any) => {
-    // Convert sak.py data to zoom effects
-    if (sakData.clicks && Array.isArray(sakData.clicks)) {
-      const newZoomEffects: ZoomEffect[] = sakData.clicks.map((click: any, index: number) => ({
-        id: `sak-${index}-${Date.now()}`,
-        startTime: click.time || index * 2,
-        endTime: (click.time || index * 2) + 2.0, // 2 second duration as specified
-        x: (click.x / sakData.width) * 100 || 50,
-        y: (click.y / sakData.height) * 100 || 50,
-        scale: 2.0, // 2.0 zoom level as specified
-        transition: 'smooth' as const
-      }));
-      setZoomEffects(prev => [...prev, ...newZoomEffects]);
-    }
-    setShowSakImport(false);
-  };
 
-  const handleAutoZoomImport = (videoFile: File, clicksData: any) => {
-    // Set the video file
-    setVideoFile(videoFile);
-    
-    // Convert clicks data to zoom effects using the specified format
+
+  const handleClicksImport = (clicksData: ClicksData) => {
     if (clicksData.clicks && Array.isArray(clicksData.clicks)) {
-      // Get the first click's timestamp as reference
-      const firstClickTime = Math.min(...clicksData.clicks.map((click: any) => click.time || 0));
-      
-      const newZoomEffects: ZoomEffect[] = clicksData.clicks.map((click: any, index: number) => {
-        // Normalize time relative to first click
-        const normalizedTime = (click.time || 0) - firstClickTime;
+      const times = clicksData.clicks.map(c => c.time || c.timestamp || 0);
+      const isEpoch = Math.min(...times) > 1e6;
+      const baseTime = isEpoch ? Math.min(...times) : 0;
+
+      const duration = typeof clicksData.duration === 'number'
+        ? clicksData.duration
+        : Math.max(...times.map(t => t - baseTime));
+
+      const newZoomEffects: ZoomEffect[] = clicksData.clicks.map((click) => {
+        const normalizedTime = (click.time || click.timestamp || 0) - baseTime;
+        const endTime = normalizedTime + (click.duration || 2.0);
+        const width = click.width || clicksData.width;
+        const height = click.height || clicksData.height;
+
         return {
-          id: `autozoom-${index}-${Date.now()}`,
-          startTime: normalizedTime,
-          endTime: normalizedTime + (click.duration || 2.0),
-          x: (click.x / clicksData.width) * 100,
-          y: (click.y / clicksData.height) * 100,
-          scale: click.zoomLevel || 2.0,
-          transition: 'smooth' as const,
-          type: 'autozoom',
-          originalData: click
-        };
-      });
-      
-      setZoomEffects(newZoomEffects);
-      console.log('Auto zoom effects imported:', newZoomEffects);
-      
-      // Select the first zoom effect
-      if (newZoomEffects.length > 0) {
-        setSelectedZoom(newZoomEffects[0]);
-      }
-    }
-    
-    // Close the recorder modal
-    setShowAutoZoomRecorder(false);
-  };
-
-  const handleClicksImport = (clicksData: any) => {
-    if (clicksData.clicks && Array.isArray(clicksData.clicks)) {
-      // Get the first click's timestamp as reference
-      const firstClickTime = Math.min(...clicksData.clicks.map((click: any) => click.time || 0));
-      
-      const newZoomEffects: ZoomEffect[] = clicksData.clicks.map((click: any, index: number) => {
-        // Normalize time relative to first click
-        const normalizedTime = (click.time || 0) - firstClickTime;
-        
-        // Create zoom effect with normalized time
-        const zoomEffect: ZoomEffect = {
-          id: click.id || `imported-${index}-${Date.now()}`,
-          startTime: normalizedTime,
-          endTime: normalizedTime + (click.duration || 2.0),
-          x: (click.x / clicksData.width) * 100,
-          y: (click.y / clicksData.height) * 100,
+          id: crypto.randomUUID(),
+          startTime: Math.max(0, Math.min(normalizedTime, duration)),
+          endTime: Math.max(0, Math.min(endTime, duration)),
+          x: (click.x / width) * 100,
+          y: (click.y / height) * 100,
           scale: click.zoomLevel || 2.0,
           transition: 'smooth',
-          type: 'autozoom',
-          originalData: click
+          type: 'autozoom' as const,
+          originalData: click,
         };
-        
-        console.log('Created zoom effect:', zoomEffect);
-        return zoomEffect;
       });
-      
-      setZoomEffects(prev => {
-        const combined = [...prev, ...newZoomEffects];
-        console.log('Updated zoom effects:', combined);
-        return combined;
-      });
+
+      setZoomEffects(prev => [...prev, ...newZoomEffects]);
     }
   };
 
@@ -232,69 +182,53 @@ export const VideoEditor: React.FC = () => {
     setSelectedZoom(null);
     setCurrentTime(0);
     setIsPlaying(false);
-    setShowAutoZoomRecorder(false);
+    setTextOverlays([]); // Clear text overlays as well
   };
+
+
+  // Utility to get export-ready zooms (sorted, filtered)
+  function getExportReadyZooms(zooms: ZoomEffect[], duration: number): ZoomEffect[] {
+    return [...zooms]
+      .filter(z => z.startTime < duration && z.endTime > 0)
+      .map(z => ({
+        ...z,
+        startTime: Math.max(0, Math.min(z.startTime, duration)),
+        endTime: Math.max(0, Math.min(z.endTime, duration)),
+      }))
+      .sort((a, b) => a.startTime - b.startTime);
+  }
 
   if (!videoFile) {
     return (
       <div>
-        <FileImport 
+        <FileImport
           onFileSelect={setVideoFile}
-          onSakImport={() => setShowSakImport(true)}
-          onAutoZoomRecord={() => setShowAutoZoomRecorder(true)}
           onClicksImport={handleClicksImport}
+          ffmpegStatus={ffmpegStatus}
+          onFfmpegCheck={checkFfmpegFiles}
         />
-        
-        {showSakImport && (
-          <SakDataImport
-            onImport={handleSakDataImport}
-            onClose={() => setShowSakImport(false)}
-          />
-        )}
-        
-        {showAutoZoomRecorder && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-gray-900 rounded-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-white">AutoZoom Recorder</h2>
-                  <button
-                    onClick={() => setShowAutoZoomRecorder(false)}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <AutoZoomRecorder onVideoImported={handleAutoZoomImport} />
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
 
   return (
     <div className="h-screen flex flex-col bg-gray-900">
-      <Header 
+      {ffmpegStatus === 'error' && (
+        <div className="bg-red-800 text-white text-center p-2 text-sm">
+          Warning: Could not load FFmpeg components. Audio mixing and fallback video export may not work.
+        </div>
+       )}
+      <Header
         videoFile={videoFile}
         onExport={() => setShowExportModal(true)}
         onNewProject={resetProject}
-        onSakImport={() => setShowSakImport(true)}
-        onAutoZoomRecord={() => setShowAutoZoomRecorder(true)}
+        onClicksImport={handleClicksImport}
+        onScreenrecorder={() => window.open('set.html', '_blank')}
       />
       
       <div className="flex-1 flex overflow-hidden">
         <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
-          <div className="flex border-b border-gray-700">
-            <button className="flex-1 py-3 px-4 text-white bg-purple-600 font-medium">
-              Zoom Effects
-            </button>
-            <button className="flex-1 py-3 px-4 text-gray-400 hover:text-white hover:bg-gray-700 font-medium">
-              Text Overlays
-            </button>
-          </div>
-          
+          {/* Removed tab buttons for Zoom Effects and Text Overlays */}
           <div className="flex-1 overflow-y-auto">
             <ZoomControls
               zoomEnabled={zoomEnabled}
@@ -307,7 +241,6 @@ export const VideoEditor: React.FC = () => {
                 const endTime = Math.min(currentTime + 2.0, duration);
                 addZoomEffect(startTime, endTime, 50, 50, 2.0);
               }}
-              currentTime={currentTime}
               duration={duration}
             />
             
@@ -318,6 +251,7 @@ export const VideoEditor: React.FC = () => {
               onDeleteText={deleteTextOverlay}
               currentTime={currentTime}
               duration={duration}
+              setPreviewText={setPreviewText}
             />
           </div>
         </div>
@@ -332,8 +266,16 @@ export const VideoEditor: React.FC = () => {
             onLoadedMetadata={(duration) => setDuration(duration)}
             onPlay={handlePlay}
             onPause={handlePause}
-            currentZoom={getCurrentZoom()}
+            currentZoom={(() => {
+              const sortedZooms = [...zoomEffects].sort((a, b) => a.startTime - b.startTime);
+              const interpolatedZoom = getInterpolatedZoom(currentTime, sortedZooms);
+              
+              // Always return the interpolated zoom, even if it's the default zoom-out
+              // This ensures the preview shows the correct zoom state at all times
+              return interpolatedZoom;
+            })()}
             textOverlays={textOverlays}
+            previewTextOverlay={previewTextOverlay}
             onVideoClick={(x, y) => {
               if (zoomEnabled && !selectedZoom) {
                 const startTime = currentTime;
@@ -342,64 +284,11 @@ export const VideoEditor: React.FC = () => {
               }
             }}
           />
-          
-          {/* Zoom List Section */}
-          <div className="bg-gray-800 border-t border-gray-700 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-white font-medium">All Zoom Effects ({zoomEffects.length})</h3>
-              {zoomEffects.length > 0 && (
-                <button
-                  onClick={deleteAllZoomEffects}
-                  className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
-                >
-                  🗑️ Clear All
-                </button>
-              )}
-            </div>
-            
-            <div className="max-h-32 overflow-y-auto space-y-2">
-              {zoomEffects.length === 0 ? (
-                <p className="text-gray-400 text-sm">No zoom effects added yet</p>
-              ) : (
-                zoomEffects.map((zoom, index) => {
-                  const isAutoZoom = zoom.type === 'autozoom';
-                  return (
-                    <div
-                      key={zoom.id}
-                      className={`flex items-center justify-between p-2 rounded ${
-                        selectedZoom?.id === zoom.id ? (isAutoZoom ? 'bg-blue-600' : 'bg-purple-600') : 'bg-gray-700'
-                      } hover:bg-gray-600 transition-colors cursor-pointer`}
-                      onClick={() => setSelectedZoom(zoom)}
-                    >
-                      <div className="flex-1">
-                        <div className="text-white text-sm">
-                          Zoom {index + 1}: {zoom.startTime.toFixed(1)}s - {zoom.endTime.toFixed(1)}s
-                        </div>
-                        <div className="text-gray-400 text-xs">
-                          Position: ({zoom.x.toFixed(0)}%, {zoom.y.toFixed(0)}%) | Scale: {zoom.scale.toFixed(1)}x
-                        </div>
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteZoomEffect(zoom.id);
-                        }}
-                        className="ml-2 px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition-colors"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-          
           <Timeline
             duration={duration}
             currentTime={currentTime}
             onSeek={handleSeek}
-            zoomEffects={zoomEffects}
+            zoomEffects={getExportReadyZooms(zoomEffects, duration)}
             selectedZoom={selectedZoom}
             onSelectZoom={setSelectedZoom}
             onUpdateZoom={updateZoomEffect}
@@ -414,38 +303,15 @@ export const VideoEditor: React.FC = () => {
       {showExportModal && (
         <ExportModal
           videoFile={videoFile}
-          zoomEffects={zoomEffects}
+          zoomEffects={getExportReadyZooms(zoomEffects, duration)}
           textOverlays={textOverlays}
           duration={duration}
           onClose={() => setShowExportModal(false)}
+          videoPlayerRef={videoRef}
         />
       )}
 
-      {showSakImport && (
-        <SakDataImport
-          onImport={handleSakDataImport}
-          onClose={() => setShowSakImport(false)}
-        />
-      )}
 
-      {showAutoZoomRecorder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">AutoZoom Recorder</h2>
-                <button
-                  onClick={() => setShowAutoZoomRecorder(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
-              <AutoZoomRecorder onVideoImported={handleAutoZoomImport} />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

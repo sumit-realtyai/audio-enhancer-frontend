@@ -1,21 +1,45 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Upload, Download, FileVideo, Sparkles, FileText, Video } from 'lucide-react';
+import { ClicksData } from '../types';
 
 interface HeaderProps {
   videoFile: File;
   onExport: () => void;
   onNewProject: () => void;
-  onSakImport: () => void;
-  onAutoZoomRecord: () => void;
+  onScreenrecorder: () => void;
+  onClicksImport: (clicksData: ClicksData) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
-  videoFile, 
-  onExport, 
-  onNewProject, 
-  onSakImport, 
-  onAutoZoomRecord 
+export const Header: React.FC<HeaderProps> = ({
+  videoFile,
+  onExport,
+  onNewProject,
+  onScreenrecorder,
+  onClicksImport
 }) => {
+  const clicksInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClicksFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'application/json') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const clicksData = JSON.parse(e.target?.result as string);
+          if (onClicksImport) {
+            onClicksImport(clicksData);
+          }
+        } catch (error) {
+          console.error('Error parsing JSON file:', error);
+          alert('Invalid JSON file. Please select a valid clicks.json file.');
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      alert('Please select a valid JSON file.');
+    }
+  };
+
   return (
     <header className="bg-gray-800 border-b border-gray-700 px-6 py-4">
       <div className="flex items-center justify-between">
@@ -32,15 +56,15 @@ export const Header: React.FC<HeaderProps> = ({
         
         <div className="flex items-center space-x-3">
           <button
-            onClick={onAutoZoomRecord}
+            onClick={onScreenrecorder}
             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
             <Video className="w-4 h-4" />
-            <span>AutoZoom Recorder</span>
+            <span>Screen Recorder</span>
           </button>
           
           <button
-            onClick={onSakImport}
+            onClick={() => clicksInputRef.current?.click()}
             className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
           >
             <FileText className="w-4 h-4" />
@@ -64,6 +88,13 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
       </div>
+      <input
+        ref={clicksInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleClicksFileSelect}
+        className="hidden"
+      />
     </header>
   );
 };

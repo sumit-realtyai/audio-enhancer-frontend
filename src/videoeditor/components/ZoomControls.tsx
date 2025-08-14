@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ZoomIn, ZoomOut, Move, Trash2, Plus, Settings } from 'lucide-react';
+import { ZoomIn, Trash2, Plus } from 'lucide-react';
 import { ZoomEffect } from '../types';
 
 interface ZoomControlsProps {
@@ -9,21 +9,16 @@ interface ZoomControlsProps {
   onUpdateZoom: (zoom: ZoomEffect) => void;
   onDeleteZoom: (id: string) => void;
   onAddZoom: () => void;
-  currentTime: number;
   duration: number;
 }
 
 export const ZoomControls: React.FC<ZoomControlsProps> = ({
-  zoomEnabled,
-  onToggleZoom,
   selectedZoom,
   onUpdateZoom,
   onDeleteZoom,
   onAddZoom,
-  currentTime,
   duration
 }) => {
-  const [dragPosition, setDragPosition] = useState({ x: 50, y: 50 });
   const [isDragging, setIsDragging] = useState(false);
 
   const handlePositionMouseDown = (e: React.MouseEvent) => {
@@ -42,8 +37,6 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
     const clampedX = Math.max(0, Math.min(100, x));
     const clampedY = Math.max(0, Math.min(100, y));
     
-    setDragPosition({ x: clampedX, y: clampedY });
-    
     onUpdateZoom({
       ...selectedZoom,
       x: clampedX,
@@ -55,7 +48,7 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
     setIsDragging(false);
   };
 
-  const updateZoomProperty = (property: keyof ZoomEffect, value: any) => {
+  const updateZoomProperty = (property: keyof ZoomEffect, value: ZoomEffect[keyof ZoomEffect]) => {
     if (!selectedZoom) return;
     onUpdateZoom({ ...selectedZoom, [property]: value });
   };
@@ -64,19 +57,6 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
     <div className="w-80 bg-gray-800 border-r border-gray-700 flex flex-col">
       <div className="p-4 border-b border-gray-700">
         <h2 className="text-lg font-semibold text-white mb-4">Zoom Effects</h2>
-        
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-gray-300">Add zoom effects</span>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={zoomEnabled}
-              onChange={(e) => onToggleZoom(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-          </label>
-        </div>
 
         <button
           onClick={onAddZoom}

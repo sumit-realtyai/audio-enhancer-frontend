@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Type, Palette, Settings } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { X, Type } from 'lucide-react';
 import { TextOverlay } from '../types';
 
 interface TextOverlayProps {
@@ -9,15 +9,16 @@ interface TextOverlayProps {
   onDeleteText: (id: string) => void;
   currentTime: number;
   duration: number;
+  setPreviewText: (preview: TextOverlay | null) => void;
 }
-
 export const TextOverlayComponent: React.FC<TextOverlayProps> = ({
   textOverlays,
   onAddText,
   onUpdateText,
   onDeleteText,
   currentTime,
-  duration
+  duration,
+  setPreviewText
 }) => {
   const [isAddingText, setIsAddingText] = useState(false);
   const [newText, setNewText] = useState('');
@@ -27,6 +28,30 @@ export const TextOverlayComponent: React.FC<TextOverlayProps> = ({
   const [fontFamily, setFontFamily] = useState('Arial');
   const [padding, setPadding] = useState(8);
   const [borderRadius, setBorderRadius] = useState(4);
+  const [previewPosition] = useState({ x: 50, y: 50 });
+  // Live preview text overlay for when adding new text
+  const currentPreviewTextOverlay: TextOverlay = useMemo(() => ({
+    id: 'preview',
+    startTime: currentTime,
+    endTime: currentTime + 3,
+    x: previewPosition.x,
+    y: previewPosition.y,
+    text: newText || 'Preview Text',
+    fontSize,
+    color,
+    fontFamily,
+    backgroundColor,
+    padding,
+    borderRadius
+  }), [currentTime, previewPosition.x, previewPosition.y, newText, fontSize, color, fontFamily, backgroundColor, padding, borderRadius]);
+  // Update preview when text or styling changes
+  React.useEffect(() => {
+    if (isAddingText) {
+      setPreviewText(currentPreviewTextOverlay);
+    } else {
+      setPreviewText(null);
+    }
+  }, [isAddingText, setPreviewText, currentPreviewTextOverlay]);
 
   const handleAddText = () => {
     if (newText.trim()) {
@@ -34,8 +59,8 @@ export const TextOverlayComponent: React.FC<TextOverlayProps> = ({
         id: Date.now().toString(),
         startTime: currentTime,
         endTime: Math.min(currentTime + 3, duration),
-        x: 50,
-        y: 50,
+        x: previewPosition.x,
+        y: previewPosition.y,
         text: newText,
         fontSize,
         color,
@@ -47,10 +72,11 @@ export const TextOverlayComponent: React.FC<TextOverlayProps> = ({
       onAddText(textOverlay);
       setNewText('');
       setIsAddingText(false);
+      setPreviewText(null);
     }
   };
 
-  const handleUpdateText = (id: string, field: keyof TextOverlay, value: any) => {
+  const handleUpdateText = (id: string, field: keyof TextOverlay, value: string | number) => {
     onUpdateText(id, { [field]: value });
   };
 

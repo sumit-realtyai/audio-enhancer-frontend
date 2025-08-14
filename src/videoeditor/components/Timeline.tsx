@@ -51,7 +51,6 @@ export const Timeline: React.FC<TimelineProps> = ({
     // Ensure time is within valid range and duration is not zero
     if (duration <= 0) return 0;
     const position = (time / duration) * 100;
-    console.log('Position calculation:', { time, duration, position });
     return Math.max(0, Math.min(100, position));
   };
 
@@ -75,7 +74,7 @@ export const Timeline: React.FC<TimelineProps> = ({
     if (dragType === 'playhead') {
       onSeek(newTime);
     } else if (dragZoom) {
-      let updatedZoom = { ...dragZoom };
+      const updatedZoom = { ...dragZoom };
 
       switch (dragType) {
         case 'zoom-start':
@@ -84,11 +83,12 @@ export const Timeline: React.FC<TimelineProps> = ({
         case 'zoom-end':
           updatedZoom.endTime = Math.max(dragZoom.startTime + 0.1, Math.min(newTime, duration));
           break;
-        case 'zoom-move':
+        case 'zoom-move': {
           const zoomDuration = dragZoom.endTime - dragZoom.startTime;
           updatedZoom.startTime = Math.max(0, Math.min(newTime, duration - zoomDuration));
           updatedZoom.endTime = updatedZoom.startTime + zoomDuration;
           break;
+        }
       }
 
       onUpdateZoom(updatedZoom);
@@ -172,8 +172,6 @@ export const Timeline: React.FC<TimelineProps> = ({
             const isAutoZoom = zoom.type === 'autozoom';
             const startPos = getPositionFromTime(zoom.startTime);
             const width = getPositionFromTime(zoom.endTime - zoom.startTime);
-            
-            console.log('Rendering zoom effect:', { id: zoom.id, type: zoom.type, startPos, width });
             
             return (
               <div
