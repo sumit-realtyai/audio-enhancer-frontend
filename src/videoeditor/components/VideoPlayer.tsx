@@ -13,6 +13,7 @@ interface VideoPlayerProps {
   onPlay: () => void;
   onPause: () => void;
   currentZoom: ZoomEffect | null;
+  zoomEffectsVersion?: number; // Force preview updates when zoom effects change
   textOverlays: TextOverlay[];
   previewTextOverlay?: TextOverlay | null;
   onVideoClick: (x: number, y: number) => void;
@@ -33,7 +34,7 @@ export interface VideoPlayerRef {
 }
 
 export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
-  ({ src, currentTime, isPlaying, onTimeUpdate, onLoadedMetadata, onPlay, onPause, currentZoom, textOverlays, previewTextOverlay, onVideoClick, onSeeked }, ref) => {
+  ({ src, currentTime, isPlaying, onTimeUpdate, onLoadedMetadata, onPlay, onPause, currentZoom, zoomEffectsVersion, textOverlays, previewTextOverlay, onVideoClick, onSeeked }, ref) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const videoWrapperRef = useRef<HTMLDivElement>(null);
@@ -50,6 +51,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       active: false, percent: 0, message: 'Preparing…'
     });
     const suppressTimeUpdateRef = useRef(false);
+    const lastZoomPositionRef = useRef<{x: number, y: number} | null>(null);
 
     /** drawer that returns a fully drawn canvas (no ImageData) */
     const drawFrameToCanvas = async (zoomEffects: ZoomEffect[], overlays: TextOverlay[]) => {
@@ -234,25 +236,32 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
     useEffect(() => { const v = videoRef.current; if (v) v.volume = isMuted ? 0 : volume; }, [volume, isMuted]);
 
-    // preview transform
+    // SMOOTH ZOOM TRANSITIONS - Natural smooth feel, no specific path types
     useEffect(() => {
-      if (currentZoom) {
-        const { x, y, scale } = currentZoom;
-        const offsetX = (50 - x) * (scale - 1);
-        const offsetY = (50 - y) * (scale - 1);
-        const dur = currentZoom.transition === 'smooth' ? '0.6s' : '0.2s';
-        const ease = 'cubic-bezier(0.4, 0.0, 0.2, 1)';
-        videoWrapperRef.current?.style.setProperty('transform', `scale(${scale.toFixed(3)}) translate(${offsetX.toFixed(3)}%, ${offsetY.toFixed(3)}%)`);
-        videoWrapperRef.current?.style.setProperty('transform-origin', 'center center');
-        videoWrapperRef.current?.style.setProperty('transition', `transform ${dur} ${ease}`);
-        videoWrapperRef.current?.style.setProperty('will-change', 'transform');
-      } else {
-        videoWrapperRef.current?.style.setProperty('transform', 'none');
-        videoWrapperRef.current?.style.setProperty('transform-origin', 'center center');
-        videoWrapperRef.current?.style.setProperty('transition', 'none');
-        videoWrapperRef.current?.style.setProperty('will-change', 'none');
+      if (videoWrapperRef.current) {
+        if (currentZoom) {
+          const { x, y, scale } = currentZoom;
+          
+          // Store zoom position for smooth zoom out
+          lastZoomPositionRef.current = { x, y };
+          
+          // SMOOTH ZOOM IN - Natural smooth transition to target point
+          videoWrapperRef.current.style.transform = `scale(${scale.toFixed(3)})`;
+          videoWrapperRef.current.style.transformOrigin = `${x}% ${y}%`;
+          videoWrapperRef.current.style.transition = 'transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1)'; // SUPER SMOOTH, no jerks
+          videoWrapperRef.current.style.willChange = 'transform';
+        } else {
+          // SMOOTH ZOOM OUT - Natural smooth transition FROM ZOOM SPOT back to fullscreen
+          const lastPos = lastZoomPositionRef.current || { x: 50, y: 50 };
+          
+          // Smooth transition: scale down FROM THE ZOOM SPOT (not center)
+          videoWrapperRef.current.style.transform = 'scale(1)';
+          videoWrapperRef.current.style.transformOrigin = `${lastPos.x}% ${lastPos.y}%`; // FROM ZOOM SPOT
+          videoWrapperRef.current.style.transition = 'transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1)'; // SUPER SMOOTH, no jerks
+          videoWrapperRef.current.style.willChange = 'auto';
+        }
       }
-    }, [currentZoom]);
+    }, [currentZoom?.id, currentZoom?.startTime, currentZoom?.endTime, zoomEffectsVersion]); // Force update when zoom effects change
 
     const handleVideoClick = (e: React.MouseEvent<HTMLVideoElement>) => {
       const rect = e.currentTarget.getBoundingClientRect();
@@ -273,6 +282,8 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       document.addEventListener('fullscreenchange', onFS);
       return () => document.removeEventListener('fullscreenchange', onFS);
     }, []);
+
+
 
     const getZoomIndicatorPosition = () => {
       const z = currentZoom || null;
@@ -326,7 +337,11 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
           <div
             className="relative w-full h-full max-w-full max-h-full"
-            style={{ backfaceVisibility: 'hidden', perspective: '1000px', transformStyle: 'preserve-3d' }}
+            style={{ 
+              transformStyle: 'preserve-3d',
+              backfaceVisibility: 'hidden',
+              perspective: '1000px'
+            }}
             ref={videoWrapperRef}
           >
             <video

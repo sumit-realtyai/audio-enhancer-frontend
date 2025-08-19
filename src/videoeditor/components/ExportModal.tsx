@@ -187,7 +187,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       if (isCancelled.current) { dbg('webcodec capture loop cancelled'); return null; }
       const t = i / fps;
       const z = getExportInterpolatedZoom(t, sortedZooms);
-      const zooms = z ? [z] : [];
+      const zooms = z ? [z] : []; // z is now null when no zoom, so this works perfectly
       const texts = textOverlays.filter(ov => t >= ov.startTime && t <= ov.endTime);
 
       await videoPlayerRef.current!.seekAndWait(t);
@@ -245,7 +245,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       '-map', '0:v:0',
       '-map', '1:a:0',
       '-c:v', 'copy',
-      '-c:a', 'aac', '-b:a', '128k',
+      '-c:a', 'copy',
       '-shortest',
       outName
     ];
@@ -288,7 +288,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       if (isCancelled.current) { dbg('ffmpeg capture loop cancelled'); return null; }
       const t = i / fps;
       const z = getExportInterpolatedZoom(t, sortedZooms);
-      const zooms = z ? [z] : [];
+      const zooms = z ? [z] : []; // z is now null when no zoom, so this works perfectly
       const texts = textOverlays.filter(ov => t >= ov.startTime && t <= ov.endTime);
 
       await videoPlayerRef.current!.seekAndWait(t);
@@ -322,7 +322,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       '-pattern_type', 'sequence',
       '-i', 'frame_%06d.jpg',
       ...(inputName ? ['-i', inputName] : []),
+      '-map', '0:v:0',
+      ...(inputName ? ['-map', '1:a:0'] : []),
       '-c:v', 'libx264',
+      ...(inputName ? ['-c:a', 'copy'] : []),
       '-pix_fmt', 'yuv420p',
       '-preset', exportSettings.speedPreset,
       '-crf', '23',
